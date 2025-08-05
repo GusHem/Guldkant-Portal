@@ -11,9 +11,9 @@ import XIcon from '../icons/XIcon.jsx';
 import TrashIcon from '../icons/TrashIcon.jsx';
 import FilePdfIcon from '../icons/FilePdfIcon.jsx';
 import CalendarIcon from '../icons/CalendarIcon.jsx';
-// --- FIX START: Importerar SVG-konstanten för logotypen ---
-import { GULDKANT_LOGO_SVG } from '../../constants/svgLogos';
-// --- FIX END ---
+
+// 🚀 INLINE SVG FIX - Eliminerar build/CORS-problem
+const GULDKANT_LOGO_SVG = `<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">  <defs>    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">      <stop offset="0%" style="stop-color:#f4e285;stop-opacity:1" />      <stop offset="50%" style="stop-color:#b5830d;stop-opacity:1" />      <stop offset="100%" style="stop-color:#8b6914;stop-opacity:1" />    </linearGradient>  </defs>  <rect x="10" y="20" width="180" height="60" rx="8" ry="8"         fill="url(#goldGradient)" stroke="#8b6914" stroke-width="2"/>  <text x="100" y="55" font-family="serif" font-size="22" font-weight="bold"         text-anchor="middle" fill="#2c1810">GULDKANT</text>  <circle cx="25" cy="35" r="3" fill="#f4e285"/>  <circle cx="175" cy="65" r="3" fill="#f4e285"/>  <path d="M 30 45 Q 35 40 40 45" stroke="#f4e285" stroke-width="2" fill="none"/>  <path d="M 160 45 Q 165 40 170 45" stroke="#f4e285" stroke-width="2" fill="none"/></svg>`;
 
 const EditModal = ({ quote, isOpen, onClose, onSave, onCopy, showToast, onDelete, onSendProposal, onApproveProposal }) => {
     const { classes } = useContext(ThemeContext);
@@ -271,15 +271,14 @@ useEffect(() => {
             const pageWidth = doc.internal.pageSize.getWidth();
             let currentY = 15; // Start position, adjusted for logo
 
-            // --- FIX START: Ersatt text-logga med Base64 SVG för att undvika CORS och få korrekt branding ---
+            // --- Använder den lokalt definierade SVG-konstanten ---
             const logoWidth = 60;
             const logoHeight = 30; // Bibehåll 2:1 ratio från SVG
             const logoX = (pageWidth / 2) - (logoWidth / 2);
-            // Konverterar importerad SVG-sträng till en base64 data-URL
+            // Konverterar SVG-sträng till en base64 data-URL
             const logoDataUrl = `data:image/svg+xml;base64,${btoa(GULDKANT_LOGO_SVG)}`;
             doc.addImage(logoDataUrl, 'SVG', logoX, currentY, logoWidth, logoHeight);
             currentY += logoHeight + 10; // Justera Y-position efter loggan
-            // --- FIX END ---
 
 
             // CUSTOMER & EVENT INFO
