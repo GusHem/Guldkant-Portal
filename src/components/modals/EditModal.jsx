@@ -11,6 +11,9 @@ import XIcon from '../icons/XIcon.jsx';
 import TrashIcon from '../icons/TrashIcon.jsx';
 import FilePdfIcon from '../icons/FilePdfIcon.jsx';
 import CalendarIcon from '../icons/CalendarIcon.jsx';
+// --- FIX START: Importerar SVG-konstanten för logotypen ---
+import { GULDKANT_LOGO_SVG } from '../../constants/svgLogos';
+// --- FIX END ---
 
 const EditModal = ({ quote, isOpen, onClose, onSave, onCopy, showToast, onDelete, onSendProposal, onApproveProposal }) => {
     const { classes } = useContext(ThemeContext);
@@ -266,14 +269,18 @@ useEffect(() => {
             const textColor = '#333333';
             const pageMargin = 15;
             const pageWidth = doc.internal.pageSize.getWidth();
-            let currentY = 25;
+            let currentY = 15; // Start position, adjusted for logo
 
-            // HEADER SECTION
-            doc.setFont('times', 'bold');
-            doc.setFontSize(28);
-            doc.setTextColor(primaryColor);
-            doc.text('GULDKANT', pageWidth / 2, currentY, { align: 'center' });
-            currentY += 15;
+            // --- FIX START: Ersatt text-logga med Base64 SVG för att undvika CORS och få korrekt branding ---
+            const logoWidth = 60;
+            const logoHeight = 30; // Bibehåll 2:1 ratio från SVG
+            const logoX = (pageWidth / 2) - (logoWidth / 2);
+            // Konverterar importerad SVG-sträng till en base64 data-URL
+            const logoDataUrl = `data:image/svg+xml;base64,${btoa(GULDKANT_LOGO_SVG)}`;
+            doc.addImage(logoDataUrl, 'SVG', logoX, currentY, logoWidth, logoHeight);
+            currentY += logoHeight + 10; // Justera Y-position efter loggan
+            // --- FIX END ---
+
 
             // CUSTOMER & EVENT INFO
             doc.setFont('helvetica', 'normal');
