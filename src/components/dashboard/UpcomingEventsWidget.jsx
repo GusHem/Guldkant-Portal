@@ -9,9 +9,13 @@ const UpcomingEventsWidget = ({ quotes, onSelect }) => {
     const upcomingEvents = useMemo(() => {
         const now = new Date();
         now.setHours(0, 0, 0, 0);
-        return quotes.filter(q => ['godkänd', 'betald'].includes(q.status) && new Date(q.eventDate) >= now)
-                     .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
-                     .slice(0, 5);
+        return quotes.filter(q => {
+            // FIX: Case-insensitive status check för att hantera "Godkänd" vs "godkänd"
+            const status = q.status?.toLowerCase();
+            return ['godkänd', 'betald'].includes(status) && new Date(q.eventDate) >= now;
+        })
+        .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
+        .slice(0, 5);
     }, [quotes]);
 
     return (
