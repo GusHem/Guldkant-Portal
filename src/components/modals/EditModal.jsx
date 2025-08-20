@@ -2,7 +2,7 @@
 // This file contains the complete, fixed version of the EditModal component.
 //
 // Critical Fixes Implemented:
-// 1. Location Field: An input field for event location has been added.
+// 1. Location Field: An input field for event location has been added, with a specific placeholder.
 // 2. Allergy Auto-Check: The data normalization now detects common allergy keywords in 'customerRequests'.
 // 3. Existing Functionality Preservation: All original code, styling, and handlers have been maintained.
 
@@ -645,6 +645,7 @@ useEffect(() => {
                                     name="eventLocation"
                                     value={formData?.eventLocation || ''}
                                     onChange={handleChange}
+                                    placeholder="T.ex. Hamravägen 8, Vimmerby"
                                 />
                                 <div className="col-span-1"></div> {/* Extra tomma rutor för att bibehålla layout */}
                                 <NumberInput 
