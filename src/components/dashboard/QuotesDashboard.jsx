@@ -23,12 +23,8 @@ const QuotesDashboard = ({ allQuotes, displayQuotes, isLoading, onSelectQuote, o
     const cardRefs = useRef({});
 
     const analytics = useMemo(() => {
-        // ✅ CRITICAL FIX: Aligned filtering logic with App.jsx to ensure consistency.
-        // This is now the single source of truth for "active" status within this component.
-        const aktivaStatus = ['utkast', 'förslag-skickat', 'godkänd', 'genomförd', 'betald'];
-        const activeQuotes = allQuotes.filter(q => aktivaStatus.includes(q.status));
-        
-        const totalValue = activeQuotes.reduce((sum, q) => sum + (q.totalPris || 0), 0);
+        const activeQuotes = allQuotes.filter(q => !['arkiverad', 'betald', 'förlorad'].includes(q.status));
+        const totalValue = activeQuotes.reduce((sum, q) => sum + (q.total || 0), 0);
         return {
             totalQuoteValue: totalValue,
             averageQuoteValue: activeQuotes.length ? (totalValue / activeQuotes.length) : 0,
@@ -40,7 +36,7 @@ const QuotesDashboard = ({ allQuotes, displayQuotes, isLoading, onSelectQuote, o
         const count = displayQuotes.length;
         if (count === 0 && !fetchError) return { text: "Inga ärenden i denna vy." };
         if (fetchError) return { text: "Kunde inte ladda ärenden." };
-        const totalValue = displayQuotes.reduce((sum, q) => sum + (q.totalPris || 0), 0);
+        const totalValue = displayQuotes.reduce((sum, q) => sum + (q.total || 0), 0);
         const filterText = statusTextMap[activeFilter] || activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1);
         const plural = count === 1 ? 'ärende' : 'ärenden';
         return { text: `Visar ${count} ${filterText === 'Alla' ? 'aktiva ' : ''}${plural} med ett totalt värde av ${totalValue.toLocaleString('sv-SE', { style: 'currency', currency: 'SEK' })}.` };
@@ -93,14 +89,14 @@ const QuotesDashboard = ({ allQuotes, displayQuotes, isLoading, onSelectQuote, o
             <QuotesControls onFilterChange={onFilterChange} onSearch={onSearch} onNewQuote={onNewQuote} activeFilter={activeFilter} searchRef={searchRef} viewMode={viewMode} setViewMode={setViewMode} summary={filterSummary} />
 
             {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
                     {Array.from({ length: 8 }).map((_, i) => <QuoteCardSkeleton key={i} />)}
                 </div>
             ) : fetchError ? (
                 <EmptyState onNewQuote={onNewQuote} error={fetchError} />
             ) : displayQuotes.length > 0 ? (
                 viewMode === 'cards' ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" onKeyDown={handleContainerKeyDown}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12" onKeyDown={handleContainerKeyDown}>
                         {displayQuotes.map(quote => <QuoteCard key={quote.id} ref={el => cardRefs.current[quote.id] = el} quote={quote} onSelect={onSelectQuote} onStatusChange={onStatusChange} />)}
                     </div>
                 ) : (
