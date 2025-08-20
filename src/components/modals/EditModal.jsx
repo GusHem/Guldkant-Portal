@@ -1,10 +1,11 @@
 // ⚛️ ATOMSMED CLONE - REPLICATE & FIX EDITMODAL.JSX
-// This file contains the complete, fixed version of the EditModal component.
+// This file contains the complete, production-ready version of the EditModal component.
 //
 // Critical Fixes Implemented:
 // 1. Location Field: An input field for event location has been added, with a specific placeholder.
 // 2. Allergy Auto-Check: The data normalization now detects common allergy keywords in 'customerRequests'.
-// 3. Existing Functionality Preservation: All original code, styling, and handlers have been maintained.
+// 3. Proper Grid Layout: The location field now spans two columns to fix the rendering issue.
+// 4. Existing Functionality Preservation: All original code, styling, and handlers have been maintained.
 
 import React, { useState, useEffect, useContext } from 'react';
 import { ThemeContext, focusClasses } from '../../contexts/ThemeContext';
@@ -639,15 +640,15 @@ useEffect(() => {
                                         </div>
                                     </div>
                                 </div>
-                                {/* ✅ FIX 1: Lägger till ett nytt fält för plats/adress */}
+                                {/* ✅ FIX: Placerar fältet för eventplats med korrekt col-span-klass och tar bort den tomma div-taggen. */}
                                 <Input
                                     label="Eventplats/Adress"
                                     name="eventLocation"
                                     value={formData?.eventLocation || ''}
                                     onChange={handleChange}
                                     placeholder="T.ex. Hamravägen 8, Vimmerby"
+                                    className="md:col-span-2"
                                 />
-                                <div className="col-span-1"></div> {/* Extra tomma rutor för att bibehålla layout */}
                                 <NumberInput 
                                     label="Antal gäster" 
                                     name="guestCount" 
