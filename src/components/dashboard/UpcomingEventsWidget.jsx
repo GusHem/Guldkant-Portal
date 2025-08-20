@@ -10,11 +10,18 @@ const UpcomingEventsWidget = ({ quotes, onSelect }) => {
         const now = new Date();
         now.setHours(0, 0, 0, 0);
         return quotes.filter(q => {
-            // FIX: Case-insensitive status check för att hantera "Godkänd" vs "godkänd"
+            // FIX 1: Case-insensitive status check för att hantera "Godkänd" vs "godkänd"
             const status = q.status?.toLowerCase();
-            return ['godkänd', 'betald'].includes(status) && new Date(q.eventDate) >= now;
+            // FIX 2: Handle both eventDate and eventDatum fields
+            const eventDate = q.eventDate || q.eventDatum;
+            return ['godkänd', 'betald'].includes(status) && eventDate && new Date(eventDate) >= now;
         })
-        .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
+        .sort((a, b) => {
+            // Also handle both field names in sorting
+            const dateA = new Date(a.eventDate || a.eventDatum);
+            const dateB = new Date(b.eventDate || b.eventDatum);
+            return dateA - dateB;
+        })
         .slice(0, 5);
     }, [quotes]);
 
@@ -37,7 +44,9 @@ const UpcomingEventsWidget = ({ quotes, onSelect }) => {
                                 <p className="font-semibold text-sm">{q.kundNamn || q.customer}</p>
                                 {q.status === 'betald' && <span className="text-xs font-bold text-purple-400">BETALD</span>}
                             </div>
-                            <p className={`text-xs ${classes.textSecondary}`}>Eventdatum: {formatDate(q.eventDate)}</p>
+                            <p className={`text-xs ${classes.textSecondary}`}>
+                                Eventdatum: {formatDate(q.eventDate || q.eventDatum)}
+                            </p>
                         </div>
                     ))
                 )}
