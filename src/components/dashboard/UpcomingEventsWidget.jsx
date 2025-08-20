@@ -6,23 +6,76 @@ import CheckCircleIcon from '../icons/CheckCircleIcon.jsx';
 
 const UpcomingEventsWidget = ({ quotes, onSelect }) => {
     const { classes } = useContext(ThemeContext);
+    
+    // ============ DEBUG START ============
+    console.log('🔍 UPCOMING EVENTS WIDGET DEBUG');
+    console.log('Total quotes received:', quotes.length);
+    console.log('All quotes:', quotes.map(q => ({
+        namn: q.kundNamn || q.customer,
+        status: q.status,
+        eventDate: q.eventDate,
+        eventDatum: q.eventDatum,
+        faktiskDatum: q.eventDate || q.eventDatum
+    })));
+    
+    // Hitta Erik specifikt
+    const erikQuote = quotes.find(q => 
+        (q.kundNamn && q.kundNamn.toLowerCase().includes('erik')) || 
+        (q.customer && q.customer.toLowerCase().includes('erik'))
+    );
+    
+    if (erikQuote) {
+        console.log('✅ ERIK FOUND:', {
+            namn: erikQuote.kundNamn || erikQuote.customer,
+            status: erikQuote.status,
+            statusLower: erikQuote.status?.toLowerCase(),
+            eventDate: erikQuote.eventDate,
+            eventDatum: erikQuote.eventDatum,
+            actualDate: erikQuote.eventDate || erikQuote.eventDatum,
+            fullObject: erikQuote
+        });
+    } else {
+        console.log('❌ ERIK NOT FOUND IN DATA');
+    }
+    // ============ DEBUG END ============
+    
     const upcomingEvents = useMemo(() => {
         const now = new Date();
         now.setHours(0, 0, 0, 0);
-        return quotes.filter(q => {
-            // FIX 1: Case-insensitive status check för att hantera "Godkänd" vs "godkänd"
+        
+        console.log('Current date for comparison:', now.toISOString());
+        
+        const filtered = quotes.filter(q => {
             const status = q.status?.toLowerCase();
-            // FIX 2: Handle both eventDate and eventDatum fields
             const eventDate = q.eventDate || q.eventDatum;
+            const dateObj = eventDate ? new Date(eventDate) : null;
+            
+            // Debug varje Erik
+            if (q.kundNamn?.toLowerCase().includes('erik') || q.customer?.toLowerCase().includes('erik')) {
+                console.log('🎯 ERIK FILTER CHECK:', {
+                    namn: q.kundNamn || q.customer,
+                    status: status,
+                    statusMatches: ['godkänd', 'betald'].includes(status),
+                    eventDate: eventDate,
+                    dateObj: dateObj?.toISOString(),
+                    isInFuture: dateObj >= now,
+                    willPass: ['godkänd', 'betald'].includes(status) && eventDate && dateObj >= now
+                });
+            }
+            
             return ['godkänd', 'betald'].includes(status) && eventDate && new Date(eventDate) >= now;
-        })
-        .sort((a, b) => {
-            // Also handle both field names in sorting
-            const dateA = new Date(a.eventDate || a.eventDatum);
-            const dateB = new Date(b.eventDate || b.eventDatum);
-            return dateA - dateB;
-        })
-        .slice(0, 5);
+        });
+        
+        console.log('Filtered upcoming events count:', filtered.length);
+        console.log('Filtered events:', filtered.map(q => q.kundNamn || q.customer));
+        
+        return filtered
+            .sort((a, b) => {
+                const dateA = new Date(a.eventDate || a.eventDatum);
+                const dateB = new Date(b.eventDate || b.eventDatum);
+                return dateA - dateB;
+            })
+            .slice(0, 5);
     }, [quotes]);
 
     return (
