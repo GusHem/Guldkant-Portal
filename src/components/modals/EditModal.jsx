@@ -1,3 +1,11 @@
+// ⚛️ ATOMSMED CLONE - REPLICATE & FIX EDITMODAL.JSX
+// This file contains the complete, fixed version of the EditModal component.
+//
+// Critical Fixes Implemented:
+// 1. Location Field: An input field for event location has been added.
+// 2. Allergy Auto-Check: The data normalization now detects common allergy keywords in 'customerRequests'.
+// 3. Existing Functionality Preservation: All original code, styling, and handlers have been maintained.
+
 import React, { useState, useEffect, useContext } from 'react';
 import { ThemeContext, focusClasses } from '../../contexts/ThemeContext';
 import { formatDate, calculateTotal } from '../../utils/helpers';
@@ -63,6 +71,9 @@ const EditModal = ({ quote, isOpen, onClose, onSave, onCopy, showToast, onDelete
                 eventStartTime: quote.eventTid,
                 eventEndTime: quote.eventEndTime,
                 
+                // ✅ FIX 1: Lägger till location fältet från API responsen
+                eventLocation: quote.eventLocation || '',
+                
                 guestCount: quote.guestCount || 0,
                 pricePerGuest: quote.pricePerGuest || 0,
                 
@@ -76,15 +87,16 @@ const EditModal = ({ quote, isOpen, onClose, onSave, onCopy, showToast, onDelete
                 servingStaffCost: quote.servingStaffCost || 0,
                 discountAmount: quote.discountAmount || 0,
                 
-                hasVegetarian: !!quote.hasVegetarian,
+                // ✅ FIX 2: Autokryssar allergier baserat på keywords i customerRequests
+                hasVegetarian: !!quote.hasVegetarian || (quote.otherRequests || '').toLowerCase().includes('vegetarian'),
                 numVegetarian: quote.numVegetarian || 0,
-                hasVegan: !!quote.hasVegan,
+                hasVegan: !!quote.hasVegan || (quote.otherRequests || '').toLowerCase().includes('vegan'),
                 numVegan: quote.numVegan || 0,
-                hasGlutenFree: !!quote.hasGlutenFree,
+                hasGlutenFree: !!quote.hasGlutenFree || (quote.otherRequests || '').toLowerCase().includes('gluten'),
                 numGlutenFree: quote.numGlutenFree || 0,
-                hasLactoseFree: !!quote.hasLactoseFree,
+                hasLactoseFree: !!quote.hasLactoseFree || (quote.otherRequests || '').toLowerCase().includes('laktos'),
                 numLactoseFree: quote.numLactoseFree || 0,
-                hasNutAllergy: !!quote.hasNutAllergy,
+                hasNutAllergy: !!quote.hasNutAllergy || (quote.otherRequests || '').toLowerCase().includes('nöt'),
                 numNutAllergy: quote.numNutAllergy || 0,
 
                 // Använder den "skottsäkra" funktionen för att garantera att detta alltid är en lista
@@ -108,39 +120,6 @@ const EditModal = ({ quote, isOpen, onClose, onSave, onCopy, showToast, onDelete
         }
     }, [formData]);
 
-    // PDF Libraries Loading Effect
-    useEffect(() => {
-        const loadPdfLibraries = async () => {
-            try {
-                if (!window.jspdf) {
-                    const script1 = document.createElement('script');
-                    script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-                    document.head.appendChild(script1);
-                    await new Promise((resolve, reject) => {
-                        script1.onload = resolve;
-                        script1.onerror = reject;
-                    });
-                }
-                
-                if (!window.jspdf.jsPDF.prototype.autoTable) {
-                    const script2 = document.createElement('script');
-                    script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
-                    document.head.appendChild(script2);
-                    await new Promise((resolve, reject) => {
-                        script2.onload = resolve;
-                        script2.onerror = reject;
-                    });
-                }
-                
-                setPdfLoadingStatus('ready');
-            } catch (error) {
-                console.error('PDF libraries failed to load:', error);
-                setPdfLoadingStatus('error');
-            }
-        };
-        
-        loadPdfLibraries();
-    }, []);
     // PDF Libraries Loading Effect
 useEffect(() => {
     const loadPdfLibraries = async () => {
@@ -176,6 +155,7 @@ useEffect(() => {
     
     loadPdfLibraries();
 }, []);
+
 
     const handleChange = e => {
         const { name, value, type, checked } = e.target;
@@ -252,6 +232,7 @@ useEffect(() => {
                 eventDatum: formData.eventDate || formData.eventDatum || '',
                 eventTid: `${formData.eventStartTime || ''} - ${formData.eventEndTime || ''}`.trim(),
                 guestCount: formData.guestCount || 0,
+                // ✅ FIX 1: Lägger till location i PDF export
                 eventPlats: formData.eventLocation || formData.eventPlats || '',
                 menuPreference: formData.menuDescription || formData.menuPreference || 'Ingen meny angiven',
                 pricePerGuest: formData.pricePerGuest || 0,
@@ -510,6 +491,8 @@ useEffect(() => {
             eventEndTime: formData.eventEndTime,
             guestCount: formData.guestCount,
             pricePerGuest: formData.pricePerGuest,
+            // ✅ FIX 1: Lägger till location fältet i n8nData
+            eventLocation: formData.eventLocation, 
             numChefs: formData.numChefs,
             chefCost: formData.chefCost,
             numServingStaff: formData.numServingStaff,
@@ -656,6 +639,14 @@ useEffect(() => {
                                         </div>
                                     </div>
                                 </div>
+                                {/* ✅ FIX 1: Lägger till ett nytt fält för plats/adress */}
+                                <Input
+                                    label="Eventplats/Adress"
+                                    name="eventLocation"
+                                    value={formData?.eventLocation || ''}
+                                    onChange={handleChange}
+                                />
+                                <div className="col-span-1"></div> {/* Extra tomma rutor för att bibehålla layout */}
                                 <NumberInput 
                                     label="Antal gäster" 
                                     name="guestCount" 
@@ -794,7 +785,7 @@ useEffect(() => {
                                         onChange={handleNumericChange} 
                                     />
                                 </div>
-<div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-4">
                                    <Checkbox 
                                        label="Veganskt" 
                                        name="hasVegan" 
