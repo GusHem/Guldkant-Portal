@@ -4,15 +4,6 @@ import { formatDate, statusColors } from '../../utils/helpers';
 import StatusSelector from './StatusSelector.jsx';
 
 const QuoteCard = React.forwardRef(({ quote, onSelect, isSelected, onStatusChange }, ref) => {
-    // ========================================================================
-    // 🕵️‍♂️ NY DIAGNOSTIK HÄR 🕵️‍♂️
-    // Denna logg körs för varje kort och visar exakt vilka fält som kommer fram.
-    console.log(`[DIAGNOSTIK I QUOTECARD för ${quote.id}] Fält som kom fram:`, Object.keys(quote));
-    // ========================================================================
-    
-    // 🔍 CRITICAL DEBUG: Log every quote that tries to render (Din befintliga logg)
-    console.log('🔍 QuoteCard rendering quote:', quote.kundNamn, quote.id, quote);
-    
     const { classes } = useContext(ThemeContext);
     const statusBorderColor = {
         utkast: 'border-l-yellow-500',
@@ -24,19 +15,16 @@ const QuoteCard = React.forwardRef(({ quote, onSelect, isSelected, onStatusChang
         arkiverad: 'border-l-gray-500'
     };
 
-    // 🔧 CRITICAL FIX: Map N8N field names to display values (Din befintliga kod)
+    // 🔧 CRITICAL FIX: Map N8N field names to display values
     const customerName = quote.kundNamn || quote.customer || 'Namnlös kund';
     const eventDate = quote.eventDatum || quote.eventDate || '';
     const totalPrice = quote.totalPris || quote.total || 0;
-
-    // 🔍 DEBUG: Log processed values (Din befintliga logg)
-    console.log('🔧 Processed values:', { customerName, eventDate, totalPrice });
 
     return (
         <div
             ref={ref}
             tabIndex="0"
-            className={`${classes.cardBg} rounded-lg shadow-lg p-5 border ${classes.border} ${statusBorderColor[quote.status] || 'border-l-gray-700'} border-l-4 transition-all duration-300 flex flex-col justify-between hover:ring-2 hover:scale-[1.02] ${isSelected ? 'ring-2 ring-cyan-500' : 'focus-within:ring-2 focus-within:ring-cyan-500/50'} ${focusClasses}`}
+            className={`${classes.cardBg} rounded-lg shadow-lg p-5 border ${classes.border} ${statusBorderColor[quote.status] || 'border-l-gray-700'} border-l-4 transition-all duration-300 flex flex-col justify-between hover:ring-2 hover:shadow-xl ${isSelected ? 'ring-2 ring-cyan-500' : 'focus-within:ring-2 focus-within:ring-cyan-500/50'} ${focusClasses}`}
             onClick={() => onSelect(quote)}
         >
             <div>
