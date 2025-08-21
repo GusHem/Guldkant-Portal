@@ -8,9 +8,13 @@ const StatusSelector = ({ quote, onStatusChange }) => {
     const { classes } = useContext(ThemeContext);
     const [isOpen, setIsOpen] = useState(false);
     const selectorRef = useRef(null);
+
     useOnClickOutside(selectorRef, () => setIsOpen(false));
 
-    const statusOptions = Object.keys(statusTextMap).map(id => ({ id, label: statusTextMap[id] }));
+    const statusOptions = Object.keys(statusTextMap).map(id => ({ 
+        id, 
+        label: statusTextMap[id] 
+    }));
 
     const handleSelect = (newStatus) => {
         onStatusChange(quote, newStatus);
@@ -32,12 +36,13 @@ const StatusSelector = ({ quote, onStatusChange }) => {
                     <CaretUpDownIcon className={`h-5 w-5 ${classes.textSecondary}`} />
                 </span>
             </button>
+
             {isOpen && (
                 <div 
-                    className={`absolute z-[9999] mt-1 max-h-56 w-full overflow-auto rounded-md ${classes.cardBg} py-1 text-base shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm`}
+                    className={`absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-md ${classes.cardBg} py-1 text-base shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm`}
                     style={{ 
                         position: 'absolute',
-                        zIndex: 9999,
+                        zIndex: 50,
                         transform: 'translateZ(0)'
                     }}
                 >
@@ -48,7 +53,9 @@ const StatusSelector = ({ quote, onStatusChange }) => {
                             className={`flex cursor-pointer select-none items-center p-2 transition-colors hover:${classes.inputBg}`}
                         >
                             <span className={`h-2.5 w-2.5 flex-shrink-0 rounded-full ${statusColors[option.id]}`}></span>
-                            <span className={`ml-3 block truncate ${quote.status === option.id ? `font-semibold ${classes.accent}` : 'font-normal'}`}>{option.label}</span>
+                            <span className={`ml-3 block truncate ${quote.status === option.id ? `font-semibold ${classes.accent}` : 'font-normal'}`}>
+                                {option.label}
+                            </span>
                         </div>
                     ))}
                 </div>
