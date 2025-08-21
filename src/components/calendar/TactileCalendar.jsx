@@ -88,14 +88,19 @@ const TactileCalendar = ({ quotes, onSelect }) => {
         const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
         const placeholders = Array(dayOffset).fill(null);
         const grid = [...placeholders, ...days];
+        
+        // 🔧 CRITICAL FIX: Same date field mapping as QuoteCard
         const quotesByDate = quotes.reduce((acc, quote) => {
-            if (quote.eventDate) {
-                const dateStr = formatDate(quote.eventDate);
+            // Map both possible date field names
+            const eventDate = quote.eventDatum || quote.eventDate;
+            if (eventDate) {
+                const dateStr = formatDate(eventDate);
                 if (!acc[dateStr]) acc[dateStr] = [];
                 acc[dateStr].push(quote);
             }
             return acc;
         }, {});
+        
         return { grid, quotesByDate, year, month };
     }, [currentDate, quotes]);
 
