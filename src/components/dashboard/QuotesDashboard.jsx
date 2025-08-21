@@ -1,3 +1,7 @@
+// 🚀 GULDKANT QUANTUM PAGINATION UI FIX
+// Filnamn: src/components/dashboard/QuotesDashboard.jsx
+// Final MVP Fix - implementerar UI för "Ladda fler"-funktionalitet.
+
 import React, { useContext, useMemo, useState, useRef } from 'react';
 import { ThemeContext, focusClasses } from '../../contexts/ThemeContext';
 import { statusTextMap } from '../../utils/helpers';
@@ -16,15 +20,35 @@ import QuoteCard from '../quotes/QuoteCard.jsx';
 import QuoteCardSkeleton from '../quotes/QuoteCardSkeleton.jsx';
 import TactileCalendar from '../calendar/TactileCalendar.jsx';
 
-const QuotesDashboard = ({ allQuotes, displayQuotes, isLoading, onSelectQuote, onNewQuote, onFilterChange, onSearch, activeFilter, searchRef, onStatusChange, fetchError }) => {
+const QuotesDashboard = ({ 
+    allQuotes, 
+    displayQuotes, 
+    isLoading, 
+    onSelectQuote, 
+    onNewQuote, 
+    onFilterChange, 
+    onSearch, 
+    activeFilter, 
+    searchRef, 
+    onStatusChange, 
+    fetchError,
+    // ✅ NYA PROPS FÖR PAGINERING
+    hasMore,
+    isFetchingMore,
+    onLoadMore
+}) => {
     const { classes } = useContext(ThemeContext);
     const [viewMode, setViewMode] = useState('cards');
     const [isFocusMode, setIsFocusMode] = useState(false);
     const cardRefs = useRef({});
 
     const analytics = useMemo(() => {
-        const activeQuotes = allQuotes.filter(q => !['arkiverad', 'betald', 'förlorad'].includes(q.status));
-        const totalValue = activeQuotes.reduce((sum, q) => sum + (q.total || 0), 0);
+        // ✅ CRITICAL FIX: Aligned filtering logic with App.jsx to ensure consistency.
+        // This is now the single source of truth for "active" status within this component.
+        const aktivaStatus = ['utkast', 'förslag-skickat', 'godkänd', 'genomförd', 'betald'];
+        const activeQuotes = allQuotes.filter(q => aktivaStatus.includes(q.status));
+        
+        const totalValue = activeQuotes.reduce((sum, q) => sum + (q.totalPris || 0), 0);
         return {
             totalQuoteValue: totalValue,
             averageQuoteValue: activeQuotes.length ? (totalValue / activeQuotes.length) : 0,
@@ -36,7 +60,7 @@ const QuotesDashboard = ({ allQuotes, displayQuotes, isLoading, onSelectQuote, o
         const count = displayQuotes.length;
         if (count === 0 && !fetchError) return { text: "Inga ärenden i denna vy." };
         if (fetchError) return { text: "Kunde inte ladda ärenden." };
-        const totalValue = displayQuotes.reduce((sum, q) => sum + (q.total || 0), 0);
+        const totalValue = displayQuotes.reduce((sum, q) => sum + (q.totalPris || 0), 0);
         const filterText = statusTextMap[activeFilter] || activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1);
         const plural = count === 1 ? 'ärende' : 'ärenden';
         return { text: `Visar ${count} ${filterText === 'Alla' ? 'aktiva ' : ''}${plural} med ett totalt värde av ${totalValue.toLocaleString('sv-SE', { style: 'currency', currency: 'SEK' })}.` };
@@ -89,19 +113,34 @@ const QuotesDashboard = ({ allQuotes, displayQuotes, isLoading, onSelectQuote, o
             <QuotesControls onFilterChange={onFilterChange} onSearch={onSearch} onNewQuote={onNewQuote} activeFilter={activeFilter} searchRef={searchRef} viewMode={viewMode} setViewMode={setViewMode} summary={filterSummary} />
 
             {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
                     {Array.from({ length: 8 }).map((_, i) => <QuoteCardSkeleton key={i} />)}
                 </div>
             ) : fetchError ? (
                 <EmptyState onNewQuote={onNewQuote} error={fetchError} />
             ) : displayQuotes.length > 0 ? (
-                viewMode === 'cards' ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12" onKeyDown={handleContainerKeyDown}>
-                        {displayQuotes.map(quote => <QuoteCard key={quote.id} ref={el => cardRefs.current[quote.id] = el} quote={quote} onSelect={onSelectQuote} onStatusChange={onStatusChange} />)}
-                    </div>
-                ) : (
-                    <TactileCalendar quotes={displayQuotes} onSelect={onSelectQuote} />
-                )
+                <>
+                    {viewMode === 'cards' ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10" onKeyDown={handleContainerKeyDown}>
+                            {displayQuotes.map(quote => <QuoteCard key={quote.id} ref={el => cardRefs.current[quote.id] = el} quote={quote} onSelect={onSelectQuote} onStatusChange={onStatusChange} />)}
+                        </div>
+                    ) : (
+                        <TactileCalendar quotes={displayQuotes} onSelect={onSelectQuote} />
+                    )}
+
+                    {/* ✅ NY UI FÖR PAGINERING */}
+                    {hasMore && (
+                        <div className="flex justify-center mt-8">
+                            <button
+                                onClick={onLoadMore}
+                                disabled={isFetchingMore}
+                                className={`px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 ${classes.buttonPrimaryBg} ${classes.buttonPrimaryText} ${classes.buttonPrimaryHover} ${focusClasses} disabled:opacity-50 disabled:cursor-not-allowed`}
+                            >
+                                {isFetchingMore ? 'Laddar...' : 'Ladda fler offerter'}
+                            </button>
+                        </div>
+                    )}
+                </>
             ) : (
                 <EmptyState onNewQuote={onNewQuote} />
             )}
